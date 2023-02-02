@@ -37,7 +37,7 @@ Added in v0.0.1
 
 ## create
 
-Create a group
+Create a group!
 
 **Signature**
 
@@ -48,7 +48,7 @@ export declare const create: (params: ICreateParams) => Effect<ICreateResult>
 **Example**
 
 ```ts
-import { groups, MlEnv } from 'fp-ts-mailerlite'
+import { groups, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
 import { pipe } from 'fp-ts/function'
 
 const deps: MlEnv = {
@@ -80,7 +80,7 @@ export declare const list: (params: IListParams) => Effect<IListResult>
 **Example**
 
 ```ts
-import { groups, MlEnv } from 'fp-ts-mailerlite'
+import { groups, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
 import { pipe } from 'fp-ts/function'
 
 const deps: MlEnv = {

@@ -8,7 +8,7 @@ import * as E from 'fp-ts/Either'
 import { pipe } from 'fp-ts/function'
 import * as RTE from 'fp-ts/ReaderTaskEither'
 import * as TE from 'fp-ts/TaskEither'
-import qs from 'qs'
+import * as qs from 'qs'
 import { MlConfig, MlEnv } from './config'
 
 /**

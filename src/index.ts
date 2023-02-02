@@ -6,6 +6,9 @@
 import * as groups from './groups'
 import * as subscribers from './subscribers'
 
+export * from './config'
+export * from './utils'
+
 export { 
 /**
  * @since 0.0.1
@@ -16,6 +19,3 @@ export {
  */
   subscribers 
 }
-
-export * from './config'
-export * from './utils'

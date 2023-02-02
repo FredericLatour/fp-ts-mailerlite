@@ -1,9 +1,8 @@
 {
   "name": "@frederic-latour/fp-ts-mailerlite",
   "homepage": "https://github.com/FredericLatour/fp-ts-mailerlite",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "fp-ts based wrapper around Mailerlite API",
-  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/FredericLatour/fp-ts-mailerlite.git"
@@ -20,6 +19,38 @@
   ],
   "engines": {
     "node": ">=16"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": "./dist/cjs/index.js",
+    "./*": {
+      "require": "./dist/cjs/*.js",
+      "import": "./dist/esm/*.js"
+    }
+  },  
+  "types": "index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rm -rf ./dist/ && mkdir -p ./dist/esm/ ./dist/cjs/ && tsc -p tsconfig.build-esm.json && tsc -p tsconfig.build-cjs.json && tsc -p tsconfig.build-types.json",
+    "build:watch": "pnpm tsc -w -p tsconfig.build.json",
+    "prepublish": "pnpm build",
+    "pretty": "prettier --check .",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "docu": "docs-ts",
+    "spell": "cspell '**/*.*'",
+    "md": "markdown"
   },
   "peerDependencies": {
     "fp-ts": "^2.9.5"
@@ -47,20 +78,9 @@
     "tslog": "^4.7.1",
     "typescript": "^4.9.4"
   },
-  "scripts": {
-    "build": "pnpm tsc -p tsconfig.build.json",
-    "build:watch": "pnpm tsc -w -p tsconfig.build.json",
-    "prepublish": "pnpm build",
-    "pretty": "pnpm prettier --check .",
-    "lint": "pnpm eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
-    "test": "pnpm jest",
-    "test:watch": "pnpm jest --watch",
-    "docu": "pnpm docs-ts",
-    "spell": "pnpm cspell '**/*.*'",
-    "md": "pnpm markdown"
-  },
   "dependencies": {
     "axios": "^1.2.5",
     "qs": "^6.11.0"
   }
 }
+

@@ -1,8 +1,6 @@
 # fp-ts-mailerlite
 
-[![Test](http:&#x2F;&#x2F;&#x2F;actions&#x2F;workflows&#x2F;build.yml&#x2F;badge.svg)](http:&#x2F;&#x2F;&#x2F;actions&#x2F;workflows&#x2F;build.yml)
-
-[API Docs](http://)
+[API Docs](https://fredericlatour.github.io/fp-ts-mailerlite/modules/groups.ts.html#create)
 
 ---
 
@@ -16,25 +14,25 @@
 Uses `fp-ts` as a peer dependency.
 
 ```bash
-yarn add fp-ts fp-ts-mailerlite
+yarn add fp-ts @frederic-latour/fp-ts-mailerlite
 ```
 
 or
 
 ```bash
-npm install fp-ts fp-ts-mailerlite
+npm install fp-ts @frederic-latour/fp-ts-mailerlite
 ```
 
 or
 
 ```bash
-pnpm add fp-ts fp-ts-mailerlite
+pnpm add fp-ts @frederic-latour/fp-ts-mailerlite
 ```
 
 ## Example
 
 ```ts
-import * as Lib from 'fp-ts-mailerlite'
+import * as Lib from '@frederic-latour/fp-ts-mailerlite'
 
 // write an example...
 ```

@@ -79,7 +79,7 @@ export interface IListResult {
  * @since 0.0.1
  * @category groups
  * @example
- * import { groups, MlEnv } from 'fp-ts-mailerlite'
+ * import { groups, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
  * import { pipe } from 'fp-ts/function'
  * 
  * const deps: MlEnv = {
@@ -119,7 +119,7 @@ interface ICreateResult {
  * @since 0.0.1
  * @category groups
  * @example
- * import { groups, MlEnv } from 'fp-ts-mailerlite'
+ * import { groups, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
  * import { pipe } from 'fp-ts/function'
  * 
  * const deps: MlEnv = {
