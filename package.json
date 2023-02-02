@@ -1,5 +1,5 @@
 {
-  "name": "fp-ts-mailerlite",
+  "name": "@frederic-latour/fp-ts-mailerlite",
   "homepage": "https://github.com/FredericLatour/fp-ts-mailerlite",
   "version": "0.0.1",
   "description": "fp-ts based wrapper around Mailerlite API",

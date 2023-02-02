@@ -114,7 +114,7 @@ interface ICreateResult {
 }
 
 /**
- * Create a group
+ * Create a group!
  *
  * @since 0.0.1
  * @category groups
