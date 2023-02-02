@@ -2,12 +2,10 @@ name: Test
 on:
   push:
     branches:
-      - main
-      - $default-branch
+      - master
   pull_request:
     branches:
-      - main
-      - $default-branch
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
