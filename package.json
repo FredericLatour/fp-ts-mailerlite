@@ -55,7 +55,7 @@
     "lint": "pnpm eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
     "test": "pnpm jest",
     "test:watch": "pnpm jest --watch",
-    "docs": "pnpm docs-ts",
+    "docu": "pnpm docs-ts",
     "spell": "pnpm cspell '**/*.*'",
     "md": "pnpm markdown"
   },

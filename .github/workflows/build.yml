@@ -42,8 +42,8 @@ jobs:
           version: 7
       - name: Install
         run: pnpm install
-      - name: Generate docs
-        run: pnpm docs
+      - name: Generate documentation
+        run: pnpm docu
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
