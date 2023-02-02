@@ -12,7 +12,6 @@ export const deps: MlEnv = {
     token: process.env['ML_TOKEN'] ?? '',
     baseUrl: 'https://connect.mailerlite.com/',
   },
-  logger: logger,
 }
 
 

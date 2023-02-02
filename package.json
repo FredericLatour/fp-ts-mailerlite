@@ -1,15 +1,33 @@
 {
   "name": "fp-ts-mailerlite",
-  "homepage": "http://",
+  "homepage": "https://github.com/FredericLatour/fp-ts-mailerlite",
   "version": "0.0.1",
+  "description": "fp-ts based wrapper around Mailerlite API",
   "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FredericLatour/fp-ts-mailerlite.git"
+  },
+  "author": "FredericLatour",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FredericLatour/fp-ts-mailerlite/issues"
+  },
+  "keywords": [
+    "typescript",
+    "fp-ts",
+    "mailerlite"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
   "peerDependencies": {
     "fp-ts": "^2.9.5"
   },
   "devDependencies": {
     "@relmify/jest-fp-ts": "^2.0.2",
     "@types/jest": "^29.4.0",
+    "@types/node": "^18.11.18",
     "@types/qs": "^6.9.7",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
@@ -19,25 +37,27 @@
     "eslint": "^8.32.0",
     "fast-check": "^3.6.2",
     "fp-ts": "^2.13.1",
+    "io-ts": "^2.2.20",
     "jest": "^29.4.1",
     "markdown-magic": "^2.6.1",
     "prettier": "^2.8.3",
     "prettier-plugin-jsdoc": "^0.4.2",
     "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
     "tslog": "^4.7.1",
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "build:watch": "tsc -w -p tsconfig.build.json",
-    "prepublish": "build",
-    "pretty": "prettier --check .",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
-    "test": "jest",
+    "build": "pnpm tsc -p tsconfig.build.json",
+    "build:watch": "pnpm tsc -w -p tsconfig.build.json",
+    "prepublish": "pnpm build",
+    "pretty": "pnpm prettier --check .",
+    "lint": "pnpm eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
+    "test": "pnpm jest",
     "test:watch": "pnpm jest --watch",
-    "docs": "docs-ts",
-    "spell": "cspell '**/*.*'",
-    "md": "markdown"
+    "docs": "pnpm docs-ts",
+    "spell": "pnpm cspell '**/*.*'",
+    "md": "pnpm markdown"
   },
   "dependencies": {
     "axios": "^1.2.5",

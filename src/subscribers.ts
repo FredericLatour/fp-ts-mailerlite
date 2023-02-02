@@ -1,3 +1,9 @@
+/**
+ * Subscribers API
+ * For mor information about subscribers, see [Subscriber statuses explained - MailerLite](https://www.mailerlite.com/help/subscriber-statuses-explained)
+ *
+ * @since 0.0.1
+ */
 import * as E from 'fp-ts/Either'
 import { DatetimeStr, Effect, ILinks } from './config'
 import { IBatchRequest, mlBatch, mlRequest } from './utils'
@@ -14,6 +20,9 @@ interface IStandardFields {
     z_i_p: string | null,
 }
 
+/**
+ * @since 0.0.1
+ */
 export interface ISubscriber<TCustomFields> {
   id: string
   email: string
@@ -35,6 +44,9 @@ export interface ISubscriber<TCustomFields> {
   optin_ip: DatetimeStr | null
 }  
 
+/**
+ * @since 0.0.1
+ */
 export interface IMeta {
   path: string
   per_page: number
@@ -51,6 +63,7 @@ type SortFields = 'created_at' | 'id' | 'subscribed_at' | 'unsubscribed_at' | 'e
 
 /**
  * Parameters GET (List)
+ * @since 0.0.1
  */
 export interface IListParams {
   /** default to 25 */
@@ -63,12 +76,18 @@ export interface IListParams {
   }
 }
 
+/**
+ * @since 0.0.1
+ */
 export interface IListResult<TCustomFields> {
   data: Array<ISubscriber<TCustomFields>>
   links: ILinks
   meta: IMeta
 }
 
+/**
+ * @since 0.0.1
+ */
 export const list = <TCustomFields>(params: IListParams): Effect<IListResult<TCustomFields>> => {
   return mlRequest({method: 'GET', params}, 'api/subscribers')
 }
@@ -76,7 +95,8 @@ export const list = <TCustomFields>(params: IListParams): Effect<IListResult<TCu
 
 /**
  * Parameters UPSERT (POST)
-*/
+ * @since 0.0.1
+ */
 export interface IUpsertParams<TCustomFields> {
   email: string
   fields?: Partial<IStandardFields & TCustomFields>
@@ -89,13 +109,23 @@ export interface IUpsertParams<TCustomFields> {
   unsubscribed_at?: DatetimeStr | null
 }
 
+/**
+ * @since 0.0.1
+ */
 export interface IUpsertResult<TCustomFields> {
   data: ISubscriber<TCustomFields>
 }
 
+/**
+ * @since 0.0.1
+ */
 export const upsert = <TCustomFields>(params: IUpsertParams<TCustomFields>): Effect<IUpsertResult<TCustomFields>> => {
   return mlRequest({method:'POST', data: params}, 'api/subscribers')
 }
+
+/**
+ * @since 0.0.1
+ */
 export const upsertBatch = <TCustomFields>(params: IUpsertParams<TCustomFields>): E.Either<Error, IBatchRequest> => {
   return mlBatch({method:'POST', data: params}, 'api/subscribers')
 }
@@ -103,6 +133,7 @@ export const upsertBatch = <TCustomFields>(params: IUpsertParams<TCustomFields>)
 
 /**
  * Parmameters FETCH (GET)
+ * @since 0.0.1
  */
 export interface IFetchParams {
   /** Subscriber Id or Email */
@@ -112,6 +143,9 @@ interface IFetchResult<TCustomFields> {
   data: ISubscriber<TCustomFields>
 }
 
+/**
+ * @since 0.0.1
+ */
 export const fetch = <TCustomFields>(params: IFetchParams): Effect<IFetchResult<TCustomFields>> => {
   return mlRequest({method:'GET'}, `api/subscribers/${params.id}`)
 }
@@ -119,6 +153,7 @@ export const fetch = <TCustomFields>(params: IFetchParams): Effect<IFetchResult<
 
 /**
  * Parmameters DELETE
+ * @since 0.0.1
  */
 export interface IDelParams {
   /** Subscriber Id */
@@ -127,6 +162,9 @@ export interface IDelParams {
 interface IDelResult {}
 
 
+/**
+ * @since 0.0.1
+ */
 export const del = (params: IDelParams): Effect<IDelResult> => {
   return mlRequest({method:'DELETE'}, `api/subscribers/${params.id}`)
 }

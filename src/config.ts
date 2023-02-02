@@ -1,25 +1,43 @@
+/**
+ * Configuration related
+ *
+ * @since 0.0.1
+ */
 import * as RTE from 'fp-ts/ReaderTaskEither'
 
-export interface ILogger {
-  info: (...args: unknown[]) => any
-  error: (...args: unknown[]) => any
-  debug: (...args: unknown[]) => any
-}
-
+/**
+ * @since 0.0.1
+ */
 export type MlConfig = { token: string, baseUrl: string, apiVersion?: Date}
+
+/**
+ * @since 0.0.1
+ */
 export type MlEnv = {
   config: MlConfig
-  logger: ILogger
 }
 
+/**
+ * @since 0.0.1
+ */
 export type Effect<A> = RTE.ReaderTaskEither<MlEnv, Error, A>
 
-/** YYYY-MM-DD*/
+
+/**
+ * Date as string: YYYY-MM-DD
+ * @since 0.0.1
+ */
 export type DateStr = string
 
-/** YYYY-MM-DD HH:MM:SS */
+/**
+ * Datetime as string: YYYY-MM-DD HH:MM:SS
+ * @since 0.0.1
+ */
 export type DatetimeStr = string
 
+/**
+ * @since 0.0.1
+ */
 export interface ILinks {
   first: string | null
   last: string | null
