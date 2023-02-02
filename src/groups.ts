@@ -51,6 +51,7 @@ type SortOrder = '+' | '-'
 type SortFields = 'name' | 'total' | 'open_rate' | 'click_rate' | 'created_at'
 
 /**
+ * list parameters
  * @since 0.0.1
  */
 export interface IListParams {
@@ -63,6 +64,7 @@ export interface IListParams {
 }
 
 /**
+ * Result returned by list
  * @since 0.0.1
  */
 export interface IListResult {
@@ -91,7 +93,7 @@ export interface IListResult {
  *    const res = await pipe(deps, groups.list({ filter: { name: 'fltest' } }))()
  *    return res
  * }   
- * test()
+ * console.log(test())
  * 
  */
 export const list = (params: IListParams): Effect<IListResult> => {
@@ -112,7 +114,27 @@ interface ICreateResult {
 }
 
 /**
+ * Create a group
+ *
  * @since 0.0.1
+ * @category groups
+ * @example
+ * import { groups, MlEnv } from 'fp-ts-mailerlite'
+ * import { pipe } from 'fp-ts/function'
+ * 
+ * const deps: MlEnv = {
+ *   config: {
+ *     token: process.env['ML_TOKEN'] ?? '',
+ *     baseUrl: 'https://connect.mailerlite.com/'
+ *   }
+ * }
+ * 
+ * async function test() {
+ *    const res = await pipe(deps, groups.create({ name: 'test_group' }))()
+ *    return res
+ * }   
+ * console.log(test())
+ * 
  */
 export const create = (params: ICreateParams): Effect<ICreateResult> => {
   return mlRequest({method:'POST', data: params}, 'api/groups')

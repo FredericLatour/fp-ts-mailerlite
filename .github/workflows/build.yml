@@ -30,22 +30,3 @@ jobs:
           ML_TOKEN: ${{secrets.ML_TOKEN}}
         run: pnpm test
       - run: pnpm lint
-  deploy-docs:
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 7
-      - name: Install
-        run: pnpm install
-      - name: Generate documentation
-        run: pnpm docu
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.0.0
-        with:
-          branch: gh-pages
-          folder: docs

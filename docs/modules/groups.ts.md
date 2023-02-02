@@ -16,6 +16,7 @@ Added in v0.0.1
 <h2 class="text-delta">Table of contents</h2>
 
 - [groups](#groups)
+  - [create](#create)
   - [list](#list)
 - [utils](#utils)
   - [ICreateParams (interface)](#icreateparams-interface)
@@ -26,7 +27,6 @@ Added in v0.0.1
   - [IListResult (interface)](#ilistresult-interface)
   - [IMeta (interface)](#imeta-interface)
   - [IUpdateParams (interface)](#iupdateparams-interface)
-  - [create](#create)
   - [del](#del)
   - [get](#get)
   - [update](#update)
@@ -34,6 +34,38 @@ Added in v0.0.1
 ---
 
 # groups
+
+## create
+
+Create a group
+
+**Signature**
+
+```ts
+export declare const create: (params: ICreateParams) => Effect<ICreateResult>
+```
+
+**Example**
+
+```ts
+import { groups, MlEnv } from 'fp-ts-mailerlite'
+import { pipe } from 'fp-ts/function'
+
+const deps: MlEnv = {
+  config: {
+    token: process.env['ML_TOKEN'] ?? '',
+    baseUrl: 'https://connect.mailerlite.com/',
+  },
+}
+
+async function test() {
+  const res = await pipe(deps, groups.create({ name: 'test_group' }))()
+  return res
+}
+console.log(test())
+```
+
+Added in v0.0.1
 
 ## list
 
@@ -62,7 +94,7 @@ async function test() {
   const res = await pipe(deps, groups.list({ filter: { name: 'fltest' } }))()
   return res
 }
-test()
+console.log(test())
 ```
 
 Added in v0.0.1
@@ -146,6 +178,8 @@ Added in v0.0.1
 
 ## IListParams (interface)
 
+list parameters
+
 **Signature**
 
 ```ts
@@ -162,6 +196,8 @@ export interface IListParams {
 Added in v0.0.1
 
 ## IListResult (interface)
+
+Result returned by list
 
 **Signature**
 
@@ -205,16 +241,6 @@ export interface IUpdateParams {
   /** new group name */
   name: string
 }
-```
-
-Added in v0.0.1
-
-## create
-
-**Signature**
-
-```ts
-export declare const create: (params: ICreateParams) => Effect<ICreateResult>
 ```
 
 Added in v0.0.1
