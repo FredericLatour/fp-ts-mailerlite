@@ -25,7 +25,10 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm build
-      - run: pnpm test
+      - name: Integration tests
+        env:
+          ML_TOKEN: ${{secrets.ML_TOKEN}}
+        run: pnpm test
       - run: pnpm lint
   deploy-docs:
     needs:
