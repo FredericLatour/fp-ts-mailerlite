@@ -14,6 +14,11 @@ export const deps: MlEnv = {
   },
 }
 
+export const cfg = {
+  token: process.env['ML_TOKEN'] ?? '',
+  baseUrl: 'https://connect.mailerlite.com/',
+}
+
 
 export type CustomFields = { dob: DateStr }
 

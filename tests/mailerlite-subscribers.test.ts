@@ -6,16 +6,30 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import 'jest'
 import { groups, subscribers } from '../src'
-import { CustomFields, deps, logger, makeSubscribers } from './common'
+import { cfg, CustomFields, logger, makeSubscribers } from './common'
 
 let subsList: ReturnType<typeof makeSubscribers>
 let grp: groups.IGroupData
 
+// const init = (env: MlEnv) => ({
+//   runner: <A>(e: Effect<A>): TE.TaskEither<Error, A> => e(env)
+// })
+
+// const fn = (cfg: MlConfig) => ({
+//   runner: <A>(e: (x: MlConfig) => TE.TaskEither<Error, A>): TE.TaskEither<Error, A> => e(cfg)
+// })
+
+
+// const initialize = (env: MlEnv) => ({
+//   runner: <A>(e: Effect<A>): Promise<E.Either<Error, A>> => e(env)()
+// })
+
 beforeAll(async () => {
   const groupName = 'fltest_' + new Date().toISOString()
+
   await pipe(
-    deps,
-    groups.create({ name: groupName }),
+    { name: groupName },
+    groups.create(cfg),
     TE.fold(
       (e) => () => {
         throw e
@@ -26,16 +40,13 @@ beforeAll(async () => {
         })
     )
   )()
-
   subsList = makeSubscribers(1, 2, [grp.id])
-
-  logger.info({ grp, subsList })
 })
 
 afterAll(async () => {
   await pipe(
-    deps,
-    groups.del({ id: grp.id }),
+    { id: grp.id },
+    groups.del(cfg),
     TE.fold(
       (e) => () => {
         throw e
@@ -73,35 +84,32 @@ afterAll(async () => {
 
 test('Upsert 00', async () => {
   const sub = subsList[0]
-  const res = await pipe(deps, subscribers.upsert<CustomFields>(sub))()
+  const res = await pipe(sub, subscribers.upsert<CustomFields>(cfg))()
   expect(res).toSubsetEqualRight({ data: { email: sub.email } })
-  logger.info('Upsert 00', res)
 })
 
 test('Upsert 01', async () => {
   const sub = subsList[1]!
-  const res = await pipe(deps, subscribers.upsert<CustomFields>(sub))()
+  const res = await pipe(sub, subscribers.upsert<CustomFields>(cfg))()
   expect(res).toSubsetEqualRight({ data: { email: sub.email } })
-  logger.info('Upsert 01', res)
 })
 
 test('List subscribers', async () => {
   const params: subscribers.IListParams = { filter: { group: grp.id } }
-  const res = await pipe(deps, subscribers.list<CustomFields>(params))()
-  logger.info('list subscribers', res)
+  const res = await pipe(params, subscribers.list<CustomFields>(cfg))()
+  expect(res).toBeRight()
 })
 
 test('Delete', async () => {
   const delOneUser = (email: string) =>
     pipe(
-      deps,
-      subscribers.fetch({ id: email }),
-      TE.chain((subs) => subscribers.del({ id: subs.data.id })(deps))
+      { id: email },
+      subscribers.fetch(cfg),
+      TE.chain((subs) => subscribers.del(cfg)({ id: subs.data.id }))
     )
   const res = await pipe(
     [delOneUser(subsList[0].email), delOneUser(subsList[1]!.email)],
     A.sequence(TE.ApplicativeSeq)
   )()
   expect(res).toBeRight()
-  logger.info(res)
 })

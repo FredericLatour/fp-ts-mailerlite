@@ -4,7 +4,8 @@
  *
  * @since 0.0.1
  */
-import { Effect, ILinks } from './config'
+import * as TE from 'fp-ts/TaskEither'
+import { ILinks, MlConfig } from './config'
 import { mlRequest } from './utils'
 
 /**
@@ -96,9 +97,13 @@ export interface IListResult {
  * console.log(test())
  * 
  */
-export const list = (params: IListParams): Effect<IListResult> => {
-  return mlRequest({method: 'GET', params}, 'api/groups')
+export const list = (config: MlConfig) => (params: IListParams): TE.TaskEither<Error, IListResult> => {
+  return mlRequest<IListResult>(config)({method: 'GET', params}, 'api/groups')
 }
+
+
+
+
 
 /**
  * Parmameters for creating a group
@@ -136,8 +141,8 @@ interface ICreateResult {
  * console.log(test())
  * 
  */
-export const create = (params: ICreateParams): Effect<ICreateResult> => {
-  return mlRequest({method:'POST', data: params}, 'api/groups')
+export const create = (config: MlConfig) => (params: ICreateParams): TE.TaskEither<Error, ICreateResult> => {
+  return mlRequest<ICreateResult>(config)({method:'POST', data: params}, 'api/groups')
 }
 
 
@@ -161,8 +166,8 @@ interface IUpdateResult {
 /**
  * @since 0.0.1
  */
-export const update = (params: IUpdateParams): Effect<IUpdateResult> => {
-  return mlRequest({method: 'PUT', data: {name: params.name}}, `api/groups/${params.id}`)
+export const update = (config: MlConfig) => (params: IUpdateParams): TE.TaskEither<Error, IUpdateResult> => {
+  return mlRequest<IUpdateResult>(config)({method: 'PUT', data: {name: params.name}}, `api/groups/${params.id}`)
 }
 
 
@@ -179,8 +184,8 @@ interface IDelResult {}
 /**
  * @since 0.0.1
  */
-export const del = (params: IDelParams): Effect<IDelResult> => {
-  return mlRequest({method:'DELETE'}, `api/groups/${params.id}`)
+export const del = (config: MlConfig) => (params: IDelParams): TE.TaskEither<Error, IDelResult> => {
+  return mlRequest<IDelResult>(config)({method:'DELETE'}, `api/groups/${params.id}`)
 }
 
 
@@ -197,6 +202,6 @@ interface IGetResult {data: IGroupData}
 /**
  * @since 0.0.1
  */
-export const get = (params: IGetParams): Effect<IGetResult> => {
-  return mlRequest({method:'GET'}, `api/groups/${params.id}`)
+export const get = (config: MlConfig) => (params: IGetParams): TE.TaskEither<Error, IGetResult> => {
+  return mlRequest<IGetResult>(config)({method:'GET'}, `api/groups/${params.id}`)
 }

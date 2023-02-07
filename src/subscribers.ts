@@ -5,7 +5,8 @@
  * @since 0.0.1
  */
 import * as E from 'fp-ts/Either'
-import { DatetimeStr, Effect, ILinks } from './config'
+import * as TE from 'fp-ts/TaskEither'
+import { DatetimeStr, ILinks, MlConfig } from './config'
 import { IBatchRequest, mlBatch, mlRequest } from './utils'
 
 
@@ -88,8 +89,8 @@ export interface IListResult<TCustomFields> {
 /**
  * @since 0.0.1
  */
-export const list = <TCustomFields>(params: IListParams): Effect<IListResult<TCustomFields>> => {
-  return mlRequest({method: 'GET', params}, 'api/subscribers')
+export const list = <TCustomFields>(config: MlConfig) => (params: IListParams): TE.TaskEither<Error, IListResult<TCustomFields>> => {
+  return mlRequest<IListResult<TCustomFields>>(config)({method: 'GET', params}, 'api/subscribers')
 }
 
 
@@ -119,8 +120,8 @@ export interface IUpsertResult<TCustomFields> {
 /**
  * @since 0.0.1
  */
-export const upsert = <TCustomFields>(params: IUpsertParams<TCustomFields>): Effect<IUpsertResult<TCustomFields>> => {
-  return mlRequest({method:'POST', data: params}, 'api/subscribers')
+export const upsert = <TCustomFields>(config: MlConfig) => (params: IUpsertParams<TCustomFields>): TE.TaskEither<Error, IUpsertResult<TCustomFields>> => {
+  return mlRequest<IUpsertResult<TCustomFields>>(config)({method:'POST', data: params}, 'api/subscribers')
 }
 
 /**
@@ -146,8 +147,8 @@ interface IFetchResult<TCustomFields> {
 /**
  * @since 0.0.1
  */
-export const fetch = <TCustomFields>(params: IFetchParams): Effect<IFetchResult<TCustomFields>> => {
-  return mlRequest({method:'GET'}, `api/subscribers/${params.id}`)
+export const fetch = <TCustomFields>(config: MlConfig) => (params: IFetchParams): TE.TaskEither<Error, IFetchResult<TCustomFields>> => {
+  return mlRequest<IFetchResult<TCustomFields>>(config)({method:'GET'}, `api/subscribers/${params.id}`)
 }
 
 
@@ -165,6 +166,6 @@ interface IDelResult {}
 /**
  * @since 0.0.1
  */
-export const del = (params: IDelParams): Effect<IDelResult> => {
-  return mlRequest({method:'DELETE'}, `api/subscribers/${params.id}`)
+export const del = (config: MlConfig) => (params: IDelParams): TE.TaskEither<Error, IDelResult> => {
+  return mlRequest<IDelResult>(config)({method:'DELETE'}, `api/subscribers/${params.id}`)
 }

@@ -6,10 +6,9 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import * as E from 'fp-ts/Either'
 import { pipe } from 'fp-ts/function'
-import * as RTE from 'fp-ts/ReaderTaskEither'
 import * as TE from 'fp-ts/TaskEither'
 import * as qs from 'qs'
-import { MlConfig, MlEnv } from './config'
+import { MlConfig } from './config'
 
 /**
  * @since 0.0.1
@@ -56,12 +55,11 @@ export const cleanedUpAxiosError = <T>(err: AxiosError<T>) => {
 /**
  * @since 0.0.1
  */
-export const mlRequest = <TRes>(opts: IRequestOpts, apiUrl: string) => {
+export const mlRequest = <TRes>(config: MlConfig) => (opts: IRequestOpts, apiUrl: string) => {
   const res = pipe(
-    RTE.ask<MlEnv>(),
-    RTE.chainTaskEitherK(({ config }) => fpAxios<TRes>(makeAxiosRequest(config, opts))(apiUrl)),
-    RTE.mapLeft(e => cleanedUpAxiosError(e)),
-    RTE.map((resp) => resp.data)
+    fpAxios<TRes>(makeAxiosRequest(config, opts))(apiUrl),
+    TE.mapLeft(e => cleanedUpAxiosError(e)),
+    TE.map((resp) => resp.data)
   )
   return res
 }
@@ -99,12 +97,11 @@ export const mlBatch = (opts: IRequestOpts, apiUrl: string): E.Either<Error, IBa
 /**
  * @since 0.0.1
  */
-export const runBatch = (reqs: Array<IBatchRequest>) => {
+export const runBatch = (config: MlConfig) => (reqs: Array<IBatchRequest>) => {
   const res = pipe(
-    RTE.ask<MlEnv>(),
-    RTE.chainTaskEitherK(({ config }) => fpAxios<IBatchResponse>(makeAxiosRequest(config, {method: 'post', data: {requests: reqs}}))('api/batch')),
-    RTE.mapLeft(e => cleanedUpAxiosError(e)),
-    RTE.map((resp) => resp.data)
+    fpAxios<IBatchResponse>(makeAxiosRequest(config, {method: 'post', data: {requests: reqs}}))('api/batch'),
+    TE.mapLeft(e => cleanedUpAxiosError(e)),
+    TE.map((resp) => resp.data)
   )
   return res
 }
