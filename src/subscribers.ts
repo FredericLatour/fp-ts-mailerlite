@@ -151,13 +151,21 @@ export const fetch = <TCustomFields>(config: MlConfig) => (params: IFetchParams)
   return mlRequest<IFetchResult<TCustomFields>>(config)({method:'GET'}, `api/subscribers/${params.id}`)
 }
 
+/**
+ * @since 0.0.5
+ */
+export const fetchBatch = (params: IFetchParams): E.Either<Error, IBatchRequest> => {
+  return mlBatch({method:'GET', data: params}, `api/subscribers/${params.id}`)
+}
+
+
 
 /**
  * Parmameters DELETE
  * @since 0.0.1
  */
 export interface IDelParams {
-  /** Subscriber Id */
+  /** Subscriber Id or email */
   id: string
 }
 interface IDelResult {}
@@ -168,4 +176,11 @@ interface IDelResult {}
  */
 export const del = (config: MlConfig) => (params: IDelParams): TE.TaskEither<Error, IDelResult> => {
   return mlRequest<IDelResult>(config)({method:'DELETE'}, `api/subscribers/${params.id}`)
+}
+
+/**
+ * @since 0.0.5
+ */
+export const delBatch = (params: IDelParams): E.Either<Error, IBatchRequest> => {
+  return mlBatch({method:'DELETE', data: params}, `api/subscribers/${params.id}`)
 }
