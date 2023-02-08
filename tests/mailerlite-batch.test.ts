@@ -86,7 +86,7 @@ test('Delete batch', async () => {
     upsertBatch,
     TE.chainW(runBatch(cfg)),
     TE.chain(validateBatch),
-    TE.chain( _ => delBatch),
+    TE.chain( r => { r; return delBatch}),
     TE.chainW(runBatch(cfg)),
     TE.chain(validateBatch),
   )()
