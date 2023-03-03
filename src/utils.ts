@@ -32,6 +32,21 @@ const makeAxiosRequest = (cfg: MlConfig, data: Partial<AxiosRequestConfig>): Axi
 /**
  * @since 0.0.1
  */
+export interface IMeta {
+  current_page: number
+  from: number
+  last_page: number
+  links: Array<{ url: string | null; label: string; active: boolean }>
+  path: string
+  per_page: number
+  to: number
+  total: number
+}
+
+
+/**
+ * @since 0.0.1
+ */
 export type xhrMeth = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface IRequestOpts {
@@ -106,3 +121,17 @@ export const runBatch = (config: MlConfig) => (reqs: Array<IBatchRequest>) => {
   return res
 }
 
+
+/**
+ * @since 0.0.6
+ */
+export const validateBatch = (b: IBatchResponse) => {
+
+  if (b.failed > 0) {
+    // const failed = pipe(b.responses, A.filter(e => e.code >= 300))
+    const err = new Error(`${b.failed} batch failed out of ${b.total}`)
+    return TE.left(err)
+  } else {
+    return TE.right(b)
+  }
+}

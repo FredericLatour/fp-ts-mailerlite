@@ -1,5 +1,10 @@
 # fp-ts-mailerlite
 
+>**Warning:** still a work in progress. 
+
+This library is an api wrapper around [Mailerlite api](https://developers.mailerlite.com/docs/fields.html#list-all-fields). It is written in Typescript using [fp-ts](https://github.com/gcanti/fp-ts).
+
+
 [API Docs](https://fredericlatour.github.io/fp-ts-mailerlite/modules/groups.ts.html#create)
 
 ---

@@ -4,6 +4,7 @@ import * as A from 'fp-ts/Array'
 import { pipe } from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
+import * as E from 'fp-ts/Either'
 import 'jest'
 import { groups, subscribers } from '../src'
 import { cfg, CustomFields, logger, makeSubscribers } from './common'
@@ -18,7 +19,6 @@ let grp: groups.IGroupData
 // const fn = (cfg: MlConfig) => ({
 //   runner: <A>(e: (x: MlConfig) => TE.TaskEither<Error, A>): TE.TaskEither<Error, A> => e(cfg)
 // })
-
 
 // const initialize = (env: MlEnv) => ({
 //   runner: <A>(e: Effect<A>): Promise<E.Either<Error, A>> => e(env)()
@@ -111,5 +111,20 @@ test('Delete', async () => {
     [delOneUser(subsList[0].email), delOneUser(subsList[1]!.email)],
     A.sequence(TE.ApplicativeSeq)
   )()
+  expect(res).toBeRight()
+})
+
+test.only('UpsertList', async () => {
+  const subscriberList = makeSubscribers(100, 310, [grp.id])
+
+  const res = await pipe(subscriberList, subscribers.upsertList<CustomFields>(cfg))()
+  const disp = E.isRight(res)
+    ? pipe(
+        res.right,
+        A.map(({ failed, successful, total }) => ({ failed, successful, total }))
+      )
+    : res.left
+
+  logger.info('UpsertList', disp)
   expect(res).toBeRight()
 })

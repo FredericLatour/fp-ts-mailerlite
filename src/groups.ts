@@ -6,7 +6,7 @@
  */
 import * as TE from 'fp-ts/TaskEither'
 import { ILinks, MlConfig } from './config'
-import { mlRequest } from './utils'
+import { IMeta, mlRequest } from './utils'
 
 /**
  * @since 0.0.1
@@ -31,20 +31,6 @@ export interface IGroupData {
   bounced_count: number
   junk_count: number
   created_at: Date
-}
-
-/**
- * @since 0.0.1
- */
-export interface IMeta {
-  current_page: number
-  from: number
-  last_page: number
-  links: Array<{ url: string | null; label: string; active: boolean }>
-  path: string
-  per_page: number
-  to: number
-  total: number
 }
 
 

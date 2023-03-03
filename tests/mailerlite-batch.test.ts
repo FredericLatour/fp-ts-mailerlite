@@ -5,7 +5,7 @@ import { pipe } from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import 'jest'
-import { groups, IBatchResponse, runBatch, subscribers } from '../src'
+import { groups, IBatchResponse, runBatch, subscribers, validateBatch } from '../src'
 import { cfg, logger, makeSubscribers } from './common'
 
 
@@ -28,17 +28,6 @@ beforeAll( async () => {
 
 
 test('Upsert batch', async () => {
-  const validateBatch = (b: IBatchResponse) => {
-
-    if (b.failed > 0) {
-      // const failed = pipe(b.responses, A.filter(e => e.code >= 300))
-      const err = new Error(`${b.failed} batch failed`)
-      return TE.left(err)
-    } else {
-      return TE.right(b)
-    }
-  }
-
 
   const res = await pipe(
     delSubsList,
@@ -58,17 +47,6 @@ test('Upsert batch', async () => {
 test('Delete batch', async () => {
 
   delSubsList = makeSubscribers(50, 60, [grp.id])
-
-  const validateBatch = (b: IBatchResponse) => {
-
-    if (b.failed > 0) {
-      // const failed = pipe(b.responses, A.filter(e => e.code >= 300))
-      const err = new Error(`${b.failed} batch failed`)
-      return TE.left(err)
-    } else {
-      return TE.right(b)
-    }
-  }
 
   const delBatch = pipe(
     delSubsList,

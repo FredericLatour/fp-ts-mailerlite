@@ -6,8 +6,10 @@
  */
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
+import { flow, pipe } from 'fp-ts/function'
+import * as A from 'fp-ts/Array'
 import { DatetimeStr, ILinks, MlConfig } from './config'
-import { IBatchRequest, mlBatch, mlRequest } from './utils'
+import { IBatchRequest, IBatchResponse, mlBatch, mlRequest, runBatch, validateBatch } from './utils'
 
 
 interface IStandardFields {
@@ -129,6 +131,35 @@ export const upsert = <TCustomFields>(config: MlConfig) => (params: IUpsertParam
  */
 export const upsertBatch = <TCustomFields>(params: IUpsertParams<TCustomFields>): E.Either<Error, IBatchRequest> => {
   return mlBatch({method:'POST', data: params}, 'api/subscribers')
+}
+
+
+/**
+ * Upsert a list of subscribers
+ * *remarks*
+ * Mailerlite does not provide any api to upsert a list of subscribers.
+ * This function relies on their batching feature (ability to batch multiple api in one call). 
+ * However batching is limited to 50 api calls at once which is quite low when you need to update hundreds of
+ * subscribers.
+ * The function will transparently call multiple batch in order to accomodate more than 50 subscribers.
+ * Beware that the batch api is quite slow. Depending on how you are updating your subscribers and how many
+ * of them you are updating, you have to ensure to handle a proper timeout.
+ * @since 0.0.6
+ */
+export const upsertList = <TCustomFields>(config: MlConfig) => (subscriberList: IUpsertParams<TCustomFields>[]): TE.TaskEither<Error, IBatchResponse[]> => {
+
+  const runAndValidateBatch = (reqs: IBatchRequest[]) => pipe(reqs,runBatch(config), TE.chain(validateBatch))
+
+  const res = pipe(
+    subscriberList,
+    A.traverse(E.Applicative)(upsertBatch),
+    E.map(A.chunksOf(50)),
+    TE.fromEither,
+    TE.map(A.map(runAndValidateBatch)),
+    TE.map( A.sequence(TE.ApplicativeSeq)),
+    TE.flatten
+  )
+  return res
 }
 
 

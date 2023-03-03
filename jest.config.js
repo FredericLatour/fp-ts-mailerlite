@@ -3,5 +3,5 @@ module.exports = {
   testEnvironment: 'node',
   // testMatch: ['<rootDir>/tests/**/*.ts'],
   setupFilesAfterEnv: ['@relmify/jest-fp-ts'],
-  testTimeout: 15_000
+  testTimeout: 120_000
 }
