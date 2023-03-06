@@ -50,7 +50,7 @@ const fieldList: fields.ICreateParams[] = [
   },
 ]
 
-  test.only('Create a list of fields', async () => {
+  test('Create a list of fields', async () => {
     const res = await pipe(
       fieldList,
       fields.createList(cfg))()
