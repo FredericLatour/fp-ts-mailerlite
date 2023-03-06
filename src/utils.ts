@@ -5,33 +5,34 @@
  */
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import * as E from 'fp-ts/Either'
+import * as A from 'fp-ts/Array'
 import { pipe } from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import * as qs from 'qs'
 import { MlConfig } from './config'
 
-/**
- * @since 0.0.1
- */
-export const fpAxios = <T=any, >(options: AxiosRequestConfig) => (url: string) => {
-  return TE.tryCatch( () => axios<T>(url, options), (x) => x as AxiosError<T>)
-}
+/** @since 0.0.1 */
+export const fpAxios =
+  <T = any>(options: AxiosRequestConfig) =>
+  (url: string) => {
+    return TE.tryCatch(
+      () => axios<T>(url, options),
+      (x) => x as AxiosError<T>
+    )
+  }
 
 const makeAxiosRequest = (cfg: MlConfig, data: Partial<AxiosRequestConfig>): AxiosRequestConfig => {
-
   return {
     headers: {
       authorization: `Bearer ${cfg.token}`,
       'content-type': 'application/json',
     },
     baseURL: cfg.baseUrl,
-    ...data
+    ...data,
   }
 }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export interface IMeta {
   current_page: number
   from: number
@@ -43,21 +44,16 @@ export interface IMeta {
   total: number
 }
 
-
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export type xhrMeth = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface IRequestOpts {
   method: xhrMeth
-  params?: {[key: string]: any}
-  data?: {[key: string]: any}
+  params?: { [key: string]: any }
+  data?: { [key: string]: any }
 }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export const cleanedUpAxiosError = <T>(err: AxiosError<T>) => {
   err.request = null
   err.config = undefined
@@ -67,66 +63,58 @@ export const cleanedUpAxiosError = <T>(err: AxiosError<T>) => {
   return err
 }
 
-/**
- * @since 0.0.1
- */
-export const mlRequest = <TRes>(config: MlConfig) => (opts: IRequestOpts, apiUrl: string) => {
-  const res = pipe(
-    fpAxios<TRes>(makeAxiosRequest(config, opts))(apiUrl),
-    TE.mapLeft(e => cleanedUpAxiosError(e)),
-    TE.map((resp) => resp.data)
-  )
-  return res
-}
+/** @since 0.0.1 */
+export const mlRequest =
+  <TRes>(config: MlConfig) =>
+  (opts: IRequestOpts, apiUrl: string) => {
+    const res = pipe(
+      fpAxios<TRes>(makeAxiosRequest(config, opts))(apiUrl),
+      TE.mapLeft((e) => cleanedUpAxiosError(e)),
+      TE.map((resp) => resp.data)
+    )
+    return res
+  }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export interface IBatchRequest {
   method: xhrMeth
   path: string
   body?: any
 }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export interface IBatchResponse {
   total: number
   successful: number
   failed: number
-  responses: Array<{code: number, body: any}>
+  responses: Array<{ code: number; body: any }>
 }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export const mlBatch = (opts: IRequestOpts, apiUrl: string): E.Either<Error, IBatchRequest> => {
   const res = pipe(
-    E.tryCatch( () => qs.stringify(opts.params, {encode: false}), E.toError),
-    E.chain( p => E.of({method: opts.method, path: apiUrl + (p ? '?' + p : ''), body: opts.data}))
+    E.tryCatch(() => qs.stringify(opts.params, { encode: false }), E.toError),
+    E.chain((p) =>
+      E.of({ method: opts.method, path: apiUrl + (p ? '?' + p : ''), body: opts.data })
+    )
   )
   return res
 }
 
-/**
- * @since 0.0.1
- */
+/** @since 0.0.1 */
 export const runBatch = (config: MlConfig) => (reqs: Array<IBatchRequest>) => {
   const res = pipe(
-    fpAxios<IBatchResponse>(makeAxiosRequest(config, {method: 'post', data: {requests: reqs}}))('api/batch'),
-    TE.mapLeft(e => cleanedUpAxiosError(e)),
+    fpAxios<IBatchResponse>(makeAxiosRequest(config, { method: 'post', data: { requests: reqs } }))(
+      'api/batch'
+    ),
+    TE.mapLeft((e) => cleanedUpAxiosError(e)),
     TE.map((resp) => resp.data)
   )
   return res
 }
 
-
-/**
- * @since 0.0.6
- */
+/** @since 0.0.6 */
 export const validateBatch = (b: IBatchResponse) => {
-
   if (b.failed > 0) {
     // const failed = pipe(b.responses, A.filter(e => e.code >= 300))
     const err = new Error(`${b.failed} batch failed out of ${b.total}`)
@@ -135,3 +123,33 @@ export const validateBatch = (b: IBatchResponse) => {
     return TE.right(b)
   }
 }
+
+/** @since 0.0.6 */
+export const batchList =
+  <T>(config: MlConfig) =>
+  (list: T[], fn: (field: T) => E.Either<Error, IBatchRequest>) => {
+    return pipe(
+      list,
+      A.traverse(E.Applicative)(fn),
+      TE.fromEither,
+      TE.chainW(runBatch(config)),
+      TE.chain(validateBatch)
+    )
+  }
+
+/** @since 0.0.6 */
+export const batchListInChunks =
+  <T>(config: MlConfig) =>
+  (chunkLength: number, list: T[], fn: (field: T) => E.Either<Error, IBatchRequest>) => {
+    const runAndValidateBatch = (reqs: IBatchRequest[]) =>
+      pipe(reqs, runBatch(config), TE.chain(validateBatch))
+    return pipe(
+      list,
+      A.traverse(E.Applicative)(fn),
+      E.map(A.chunksOf(chunkLength)),
+      TE.fromEither,
+      TE.map(A.map(runAndValidateBatch)),
+      TE.map(A.sequence(TE.ApplicativeSeq)),
+      TE.flatten
+    )
+  }

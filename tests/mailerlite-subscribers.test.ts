@@ -114,10 +114,29 @@ test('Delete', async () => {
   expect(res).toBeRight()
 })
 
-test.only('UpsertList', async () => {
+test('UpsertList', async () => {
   const subscriberList = makeSubscribers(100, 310, [grp.id])
 
   const res = await pipe(subscriberList, subscribers.upsertList<CustomFields>(cfg))()
+  const disp = E.isRight(res)
+    ? pipe(
+        res.right,
+        A.map(({ failed, successful, total }) => ({ failed, successful, total }))
+      )
+    : res.left
+
+  logger.info('UpsertList', disp)
+  expect(res).toBeRight()
+})
+
+test('deleteList', async () => {
+  const subscriberList = makeSubscribers(100, 310, [grp.id])
+
+  const res = await pipe(
+    subscriberList,
+    A.map((x) => ({ id: x.email })),
+    subscribers.delList(cfg)
+  )()
   const disp = E.isRight(res)
     ? pipe(
         res.right,

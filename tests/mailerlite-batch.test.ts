@@ -27,24 +27,24 @@ beforeAll( async () => {
 })
 
 
-test('Upsert batch', async () => {
+// test('Upsert batch', async () => {
 
-  const res = await pipe(
-    delSubsList,
-    A.traverse(E.Applicative)(subscribers.upsertBatch),
-    TE.fromEither,
-    TE.chainW(xs => runBatch(cfg)(xs)),
-    TE.chain(validateBatch)
-  )()
-  expect(res).toBeRight()
+//   const res = await pipe(
+//     delSubsList,
+//     A.traverse(E.Applicative)(subscribers.upsertBatch),
+//     TE.fromEither,
+//     TE.chainW(xs => runBatch(cfg)(xs)),
+//     TE.chain(validateBatch)
+//   )()
+//   expect(res).toBeRight()
 
-  if (E.isRight(res)) {
-    logger.info('res', {...res.right, responses: null})
-  }
-})
+//   if (E.isRight(res)) {
+//     logger.info('res', {...res.right, responses: null})
+//   }
+// })
 
 
-test('Delete batch', async () => {
+test('Upsert & Delete batch', async () => {
 
   delSubsList = makeSubscribers(50, 60, [grp.id])
 
