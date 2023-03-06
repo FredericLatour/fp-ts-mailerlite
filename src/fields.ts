@@ -6,10 +6,7 @@
  */
 import * as TE from 'fp-ts/TaskEither'
 import { ILinks, MlConfig } from './config'
-import { batchList, IBatchRequest, IMeta, mlBatch, mlRequest, runBatch, validateBatch } from './utils'
-import { pipe } from 'fp-ts/function'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
+import { batchList, IMeta, mlBatch, mlRequest } from './utils'
 
 /** @since 0.0.6 */
 export interface IField {

@@ -4,9 +4,7 @@
  *
  * @since 0.0.1
  */
-import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
-import { pipe } from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import { DatetimeStr, ILinks, MlConfig } from './config'
 import {
@@ -14,9 +12,7 @@ import {
   IBatchRequest,
   IBatchResponse,
   mlBatch,
-  mlRequest,
-  runBatch,
-  validateBatch,
+  mlRequest
 } from './utils'
 
 interface IStandardFields {

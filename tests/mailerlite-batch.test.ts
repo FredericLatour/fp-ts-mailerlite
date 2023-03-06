@@ -5,7 +5,7 @@ import { pipe } from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import 'jest'
-import { groups, IBatchResponse, runBatch, subscribers, validateBatch } from '../src'
+import { groups, runBatch, subscribers, validateBatch } from '../src'
 import { cfg, logger, makeSubscribers } from './common'
 
 
