@@ -1,7 +1,7 @@
 {
   "name": "@frederic-latour/fp-ts-mailerlite",
   "homepage": "https://github.com/FredericLatour/fp-ts-mailerlite",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "fp-ts based wrapper around Mailerlite API",
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
       "require": "./dist/cjs/*.js",
       "import": "./dist/esm/*.js"
     }
-  },  
+  },
   "types": "index.d.ts",
   "typesVersions": {
     "*": {
@@ -46,16 +46,19 @@
     "prepublish": "pnpm build",
     "pretty": "prettier --check .",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "docu": "docs-ts",
     "spell": "cspell '**/*.*'",
-    "md": "markdown"
+    "md": "markdown",
+    "prepare": "husky install"
   },
   "peerDependencies": {
     "fp-ts": "^2.9.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.4.4",
+    "@commitlint/config-conventional": "^17.4.4",
     "@relmify/jest-fp-ts": "^2.0.2",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",
@@ -68,6 +71,7 @@
     "eslint": "^8.32.0",
     "fast-check": "^3.6.2",
     "fp-ts": "^2.13.1",
+    "husky": "^8.0.3",
     "io-ts": "^2.2.20",
     "jest": "^29.4.1",
     "markdown-magic": "^2.6.1",
@@ -83,4 +87,3 @@
     "qs": "^6.11.0"
   }
 }
-
