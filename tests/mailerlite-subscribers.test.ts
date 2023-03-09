@@ -147,3 +147,40 @@ test('deleteList', async () => {
   logger.info('UpsertList', disp)
   expect(res).toBeRight()
 })
+
+
+test('Delete non existing subscriber should be left', async () => {
+  const res = await pipe(
+        subscribers.del(cfg)({id: 'fake@fake.com'})
+  )()
+  logger.info('Delete non existing', res)
+  expect(res).toBeLeft()
+})
+
+test('deleteList with non existing subs', async () => {
+  const subscriberList = [{email: 'fake01@fake.com'}, {email: 'fake02@fake.com'}, ]
+
+  const res = await pipe(
+    subscriberList,
+    A.map((x) => ({ id: x.email })),
+    subscribers.delList(cfg)
+  )()
+
+  logger.info('deletelist with non existing', res)
+  expect(res).toBeLeft()
+})
+
+
+test.only('deleteList with a mix of non existing and existing subs', async () => {
+  
+  const res = await pipe(
+    subsList[0],
+    subscribers.upsert<CustomFields>(cfg),
+    TE.map(xs => [{id: xs.data.email}, {id: 'fake@fake.com'}]),
+    TE.chain(subscribers.delList(cfg))
+    )()
+
+  logger.info('deletelist with a mix', res)
+  expect(res).toBeLeft()
+})
+
