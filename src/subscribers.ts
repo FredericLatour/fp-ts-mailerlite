@@ -6,14 +6,9 @@
  */
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
-import { DatetimeStr, ILinks, MlConfig } from './config'
-import {
-  batchListInChunks,
-  IBatchRequest,
-  IBatchResponse,
-  mlBatch,
-  mlRequest
-} from './utils'
+import { batchListInChunks, IBatchRequest, IBatchResponse, mlBatch } from './batch'
+import { DatetimeStr, ILinks, MlConfig, MlError } from './config'
+import { mlRequest } from './utils'
 
 interface IStandardFields {
   city: string | null
@@ -76,18 +71,42 @@ export interface IListParams {
   }
 }
 
-/** @since 0.0.1 */
-export interface IListResult<TCustomFields> {
+/** 
+ * Response from @link(List) 
+ * @since 0.0.7 */
+export interface IListResponse<TCustomFields> {
   data: Array<ISubscriber<TCustomFields>>
   links: ILinks
   meta: IMeta
 }
 
-/** @since 0.0.1 */
+/** 
+ * Create a list of fields. _Remarks_ Since Mailerlite does not have an api allowing creating
+ * multiple fields at once, we are batching the creation of each field in the list.
+ *
+ * @since 0.0.7
+ * @category Subscribers
+ * @example
+ *   import { subscribers, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
+ *   import { pipe } from 'fp-ts/function'
+ *
+ *   type CustomFields = {purchases: number}
+ *   const cfg = {
+ *     token: process.env['ML_TOKEN'],
+ *     baseUrl: 'https://connect.mailerlite.com/',
+ *   }
+ *
+ *   async function test() {
+ *     const params: subscribers.IListParams = { filter: { group: 5 }, sort: '+email' }
+ *
+ *     return await pipe(params, subscribers.list<CustomFields>(cfg))()
+ *   }
+ *   console.log(test())
+ * */
 export const list =
   <TCustomFields>(config: MlConfig) =>
-  (params: IListParams): TE.TaskEither<Error, IListResult<TCustomFields>> => {
-    return mlRequest<IListResult<TCustomFields>>(config)(
+  (params: IListParams): TE.TaskEither<MlError, IListResponse<TCustomFields>> => {
+    return mlRequest<IListResponse<TCustomFields>>(config)(
       { method: 'GET', params },
       'api/subscribers'
     )
@@ -111,15 +130,15 @@ export interface IUpsertParams<TCustomFields> {
 }
 
 /** @since 0.0.1 */
-export interface IUpsertResult<TCustomFields> {
+export interface IUpsertResponse<TCustomFields> {
   data: ISubscriber<TCustomFields>
 }
 
 /** @since 0.0.1 */
 export const upsert =
   <TCustomFields>(config: MlConfig) =>
-  (params: IUpsertParams<TCustomFields>): TE.TaskEither<Error, IUpsertResult<TCustomFields>> => {
-    return mlRequest<IUpsertResult<TCustomFields>>(config)(
+  (params: IUpsertParams<TCustomFields>): TE.TaskEither<MlError, IUpsertResponse<TCustomFields>> => {
+    return mlRequest<IUpsertResponse<TCustomFields>>(config)(
       { method: 'POST', data: params },
       'api/subscribers'
     )
@@ -128,12 +147,14 @@ export const upsert =
 /** @since 0.0.1 */
 export const upsertBatch = <TCustomFields>(
   params: IUpsertParams<TCustomFields>
-): E.Either<Error, IBatchRequest> => {
+): E.Either<MlError, IBatchRequest> => {
   return mlBatch({ method: 'POST', data: params }, 'api/subscribers')
 }
 
 /**
- * Upsert a list of subscribers _remarks_ Mailerlite does not provide any api to upsert a list of
+ * Upsert a list of subscribers 
+ * 
+ * _remarks_ Mailerlite does not provide any api to upsert a list of
  * subscribers. This function relies on their batching feature (ability to batch multiple api in one
  * call). However batching is limited to 50 api calls at once which is quite low when you need to
  * update hundreds of subscribers. The function will transparently call multiple batch in order to
@@ -145,7 +166,7 @@ export const upsertBatch = <TCustomFields>(
  */
 export const upsertList =
   <TCustomFields>(config: MlConfig) =>
-  (subscriberList: IUpsertParams<TCustomFields>[]): TE.TaskEither<Error, IBatchResponse[]> => {
+  (subscriberList: IUpsertParams<TCustomFields>[]): TE.TaskEither<MlError, IBatchResponse[]> => {
     return batchListInChunks<IUpsertParams<TCustomFields>>(config)(50, subscriberList, upsertBatch)
   }
 
@@ -158,22 +179,22 @@ export interface IFetchParams {
   /** Subscriber Id or Email */
   id: string
 }
-interface IFetchResult<TCustomFields> {
+interface IFetchResponse<TCustomFields> {
   data: ISubscriber<TCustomFields>
 }
 
 /** @since 0.0.1 */
 export const fetch =
   <TCustomFields>(config: MlConfig) =>
-  (params: IFetchParams): TE.TaskEither<Error, IFetchResult<TCustomFields>> => {
-    return mlRequest<IFetchResult<TCustomFields>>(config)(
+  (params: IFetchParams): TE.TaskEither<MlError, IFetchResponse<TCustomFields>> => {
+    return mlRequest<IFetchResponse<TCustomFields>>(config)(
       { method: 'GET' },
       `api/subscribers/${params.id}`
     )
   }
 
 /** @since 0.0.5 */
-export const fetchBatch = (params: IFetchParams): E.Either<Error, IBatchRequest> => {
+export const fetchBatch = (params: IFetchParams): E.Either<MlError, IBatchRequest> => {
   return mlBatch({ method: 'GET', data: params }, `api/subscribers/${params.id}`)
 }
 
@@ -186,22 +207,23 @@ export interface IDelParams {
   /** Subscriber Id or email */
   id: string
 }
-interface IDelResult {}
+interface IDelResponse {}
 
 /** @since 0.0.1 */
 export const del =
   (config: MlConfig) =>
-  (params: IDelParams): TE.TaskEither<Error, IDelResult> => {
-    return mlRequest<IDelResult>(config)({ method: 'DELETE' }, `api/subscribers/${params.id}`)
+  (params: IDelParams): TE.TaskEither<MlError, IDelResponse> => {
+    return mlRequest<IDelResponse>(config)({ method: 'DELETE' }, `api/subscribers/${params.id}`)
   }
 
 /** @since 0.0.5 */
-export const delBatch = (params: IDelParams): E.Either<Error, IBatchRequest> => {
+export const delBatch = (params: IDelParams): E.Either<MlError, IBatchRequest> => {
   return mlBatch({ method: 'DELETE', data: params }, `api/subscribers/${params.id}`)
 }
 
 /**
- * delete a list of subscribers _remarks_ Mailerlite does not provide any api to delete a list of
+ * delete a list of subscribers
+ * _remarks_ Mailerlite does not provide any api to delete a list of
  * subscribers. This function relies on their batching feature (ability to batch multiple api in one
  * call). However batching is limited to 50 api calls at once which is quite low when you need to
  * update hundreds of subscribers. The function will transparently call multiple batch in order to
@@ -213,5 +235,5 @@ export const delBatch = (params: IDelParams): E.Either<Error, IBatchRequest> => 
  */
 export const delList =
   (config: MlConfig) =>
-  (subscriberList: IDelParams[]): TE.TaskEither<Error, IBatchResponse[]> =>
+  (subscriberList: IDelParams[]): TE.TaskEither<MlError, IBatchResponse[]> =>
     batchListInChunks<IDelParams>(config)(50, subscriberList, delBatch)

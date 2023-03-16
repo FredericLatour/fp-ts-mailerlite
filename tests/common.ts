@@ -6,7 +6,7 @@ import { pipe } from 'fp-ts/function'
 
 export const parsedEnv = dotenv.config()
 
-export const logger = new Logger()
+export const logger = new Logger({type:'hidden'})
 export const deps: MlEnv = {
   config: {
     token: process.env['ML_TOKEN'] ?? '',

@@ -5,7 +5,7 @@ import { pipe } from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import 'jest'
-import { groups, runBatch, subscribers, validateBatch } from '../src'
+import { groups, subscribers, batch} from '../src'
 import { cfg, logger, makeSubscribers } from './common'
 
 
@@ -62,11 +62,11 @@ test('Upsert & Delete batch', async () => {
 
   const res = await pipe(
     upsertBatch,
-    TE.chainW(runBatch(cfg)),
-    TE.chain(validateBatch),
+    TE.chainW(batch.runBatch(cfg)),
+    TE.chainW(batch.validateBatch),
     TE.chain( r => { r; return delBatch}),
-    TE.chainW(runBatch(cfg)),
-    TE.chain(validateBatch),
+    TE.chainW(batch.runBatch(cfg)),
+    TE.chainW(batch.validateBatch),
   )()
   expect(res).toBeRight()
 

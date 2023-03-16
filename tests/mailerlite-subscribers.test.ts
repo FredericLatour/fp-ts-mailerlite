@@ -1,10 +1,10 @@
 /* eslint-disable  @typescript-eslint/no-non-null-assertion */
 import '@relmify/jest-fp-ts'
 import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
 import { pipe } from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
 import 'jest'
 import { groups, subscribers } from '../src'
 import { cfg, CustomFields, logger, makeSubscribers } from './common'
@@ -56,7 +56,7 @@ afterAll(async () => {
   )()
 })
 
-// test.only('create group, add subscriber...', async () => {
+// test('create group, add subscriber...', async () => {
 //   const groupName = 'fltest_'+ (new Date()).toISOString()
 //   const resCreate = await pipe(
 //     TE.Do,
@@ -148,6 +148,21 @@ test('deleteList', async () => {
   expect(res).toBeRight()
 })
 
+test('Upsert Error', async () => {
+  const sub = subsList[0]
+  const res = await pipe({...sub, email: '', wrongfield: 'test' }, subscribers.upsert<CustomFields>(cfg))()
+  logger.info('Upsert Error', res)
+  expect(res).toBeLeft()
+})
+
+
+test('List subscribers with wrong params', async () => {
+  const wrongParams = JSON.parse(JSON.stringify({limit: 2, filter: {truc: 'test'}}))
+  const res = await pipe(wrongParams, subscribers.list<CustomFields>(cfg))()
+  logger.info('List subscribers with wrong params', res)
+  expect(res).toSubsetEqualLeft({kind: 'UnprocessableError'})
+})
+
 
 test('Delete non existing subscriber should be left', async () => {
   const res = await pipe(
@@ -160,18 +175,28 @@ test('Delete non existing subscriber should be left', async () => {
 test('deleteList with non existing subs', async () => {
   const subscriberList = [{email: 'fake01@fake.com'}, {email: 'fake02@fake.com'}, ]
 
+  // const checkErr = (err: MlError) => {
+  //   const data = err.data as IBatchResponse
+  //   const nErr = data.responses.filter( el => (el.code > 300 && el.code != 404) )
+  //   return nErr.length
+  // }
+
   const res = await pipe(
     subscriberList,
     A.map((x) => ({ id: x.email })),
-    subscribers.delList(cfg)
+    subscribers.delList(cfg),
+    // TE.fold( 
+    //   e => checkErr(e) > 0 ? TE.left(e) : TE.right(e as any),
+    //   res => TE.right(res)
+    //   )
   )()
 
   logger.info('deletelist with non existing', res)
-  expect(res).toBeLeft()
+  expect(res).toSubsetEqualLeft({kind: 'BatchError', message: '2 batch failed out of 2' })
 })
 
 
-test.only('deleteList with a mix of non existing and existing subs', async () => {
+test('deleteList with a mix of non existing and existing subs', async () => {
   
   const res = await pipe(
     subsList[0],
@@ -181,6 +206,6 @@ test.only('deleteList with a mix of non existing and existing subs', async () =>
     )()
 
   logger.info('deletelist with a mix', res)
-  expect(res).toBeLeft()
+  expect(res).toSubsetEqualLeft({kind: 'BatchError', message: '1 batch failed out of 2' })
 })
 

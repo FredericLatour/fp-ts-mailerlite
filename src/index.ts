@@ -6,6 +6,7 @@
 import * as groups from './groups'
 import * as fields from './fields'
 import * as subscribers from './subscribers'
+import * as batch from './batch'
 
 export * from './config'
 export * from './utils'
@@ -17,4 +18,6 @@ export {
   subscribers,
   /** @since 0.0.6 */
   fields,
+  /** @since 0.0.7 */
+  batch
 }

@@ -2,13 +2,14 @@
  * Fields API For mor information about fields, see
  * [Fields](https://developers.mailerlite.com/docs/fields.html#list-all-fields)
  *
- * @since 0.0.6
+ * @since 0.0.7
  */
 import * as TE from 'fp-ts/TaskEither'
-import { ILinks, MlConfig } from './config'
-import { batchList, IMeta, mlBatch, mlRequest } from './utils'
+import { batchList, mlBatch } from './batch'
+import { ILinks, MlConfig, MlError } from './config'
+import { IMeta, mlRequest } from './utils'
 
-/** @since 0.0.6 */
+/** @since 0.0.7 */
 export interface IField {
   id: string
   name: string
@@ -21,7 +22,7 @@ export interface IField {
 /**
  * List parameters
  *
- * @since 0.0.6
+ * @since 0.0.7
  */
 export interface IListParams {
   limit?: number
@@ -33,11 +34,11 @@ export interface IListParams {
 }
 
 /**
- * Result returned by list
+ * list response
  *
- * @since 0.0.6
+ * @since 0.0.7
  */
-export interface IListResult {
+export interface IListResponse {
   data: Array<IField>
   links: ILinks
   meta: IMeta
@@ -46,7 +47,7 @@ export interface IListResult {
 /**
  * List All fields
  *
- * @since 0.0.6
+ * @since 0.0.7
  * @category Fields
  * @example
  *   import { fields, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
@@ -65,38 +66,38 @@ export interface IListResult {
  */
 export const list =
   (config: MlConfig) =>
-  (params: IListParams): TE.TaskEither<Error, IListResult> => {
-    return mlRequest<IListResult>(config)({ method: 'GET', params }, 'api/fields')
+  (params: IListParams): TE.TaskEither<MlError, IListResponse> => {
+    return mlRequest<IListResponse>(config)({ method: 'GET', params }, 'api/fields')
   }
 
 /**
  * Parmameters for creating a field
  *
- * @since 0.0.6
+ * @since 0.0.7
  */
 export type ICreateParams = Pick<IField, 'name' | 'type'>
 
-interface ICreateResult {
+interface ICreateResponse {
   data: IField
 }
 
 /**
  * Create a field
  *
- * @since 0.0.6
+ * @since 0.0.7
  * @category Fields
  */
 export const create =
   (config: MlConfig) =>
-  (params: ICreateParams): TE.TaskEither<Error, ICreateResult> => {
-    return mlRequest<ICreateResult>(config)({ method: 'POST', data: params }, 'api/fields')
+  (params: ICreateParams): TE.TaskEither<MlError, ICreateResponse> => {
+    return mlRequest<ICreateResponse>(config)({ method: 'POST', data: params }, 'api/fields')
   }
 
 /**
  * Create a list of fields. _Remarks_ Since Mailerlite does not have an api allowing creating
  * multiple fields at once, we are batching the creation of each field in the list.
  *
- * @since 0.0.6
+ * @since 0.0.7
  * @category Fields
  * @example
  *   import { fields, MlEnv } from '@frederic-latour/fp-ts-mailerlite'
@@ -122,19 +123,19 @@ export const createList = (config: MlConfig) => (fieldList: ICreateParams[]) => 
   return batchList<ICreateParams>(config)(fieldList, cbatch)
 }
 
-/** @since 0.0.6 */
+/** @since 0.0.7 */
 export type IUpdateParams = Pick<IField, 'id' | 'name'>
 
-/** @since 0.0.6 */
-interface IUpdateResult {
+/** @since 0.0.7 */
+interface IUpdateResponse {
   data: IField
 }
 
-/** @since 0.0.6 */
+/** @since 0.0.7 */
 export const update =
   (config: MlConfig) =>
-  (params: IUpdateParams): TE.TaskEither<Error, IUpdateResult> => {
-    return mlRequest<IUpdateResult>(config)(
+  (params: IUpdateParams): TE.TaskEither<MlError, IUpdateResponse> => {
+    return mlRequest<IUpdateResponse>(config)(
       { method: 'PUT', data: { name: params.name } },
       `api/fields/${params.id}`
     )
@@ -143,26 +144,26 @@ export const update =
 /**
  * Parmameters for deleting a group
  *
- * @since 0.0.6
+ * @since 0.0.7
  */
 export interface IDelParams {
   /** Group Id */
   id: string
 }
-interface IDelResult {}
+interface IDelResponse {}
 
-/** @since 0.0.6 */
+/** @since 0.0.7 */
 export const del =
   (config: MlConfig) =>
-  (params: Pick<IField, 'id'>): TE.TaskEither<Error, IDelResult> => {
-    return mlRequest<IDelResult>(config)({ method: 'DELETE' }, `api/fields/${params.id}`)
+  (params: Pick<IField, 'id'>): TE.TaskEither<MlError, IDelResponse> => {
+    return mlRequest<IDelResponse>(config)({ method: 'DELETE' }, `api/fields/${params.id}`)
   }
 
 
 /**
  * Create multiple fields
  *
- * @since 0.0.6
+ * @since 0.0.7
  * @category Fields
  */
 export const delFields = (config: MlConfig) => (fieldList: IDelParams[]) => {

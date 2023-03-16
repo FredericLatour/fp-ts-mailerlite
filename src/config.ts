@@ -4,6 +4,7 @@
  * @since 0.0.1
  */
 import * as RTE from 'fp-ts/ReaderTaskEither'
+import { IBatchResponse } from './batch'
 
 /**
  * @since 0.0.1
@@ -44,3 +45,42 @@ export interface ILinks {
   prev: string | null
   next: string | null
 }
+
+
+/**
+ * @since 0.0.7
+ */
+export interface ExternalError {
+  kind: 'ExternalError'
+  code: number
+  message: string
+  data?: any
+  initialError: Error
+}
+
+/**
+ * @since 0.0.7
+ */
+export interface UnprocessableError {
+  kind: 'UnprocessableError'
+  code: number
+  message: string
+  data?: any
+  initialError?: Error
+}
+
+/**
+ * @since 0.0.7
+ */
+export interface BatchError {
+  kind: 'BatchError'
+  message: string
+  data: IBatchResponse
+  initialError?: Error
+}
+
+
+/**
+ * @since 0.0.7
+ */
+export type MlError = ExternalError | UnprocessableError | BatchError

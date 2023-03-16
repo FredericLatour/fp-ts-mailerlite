@@ -4,12 +4,9 @@
  * @since 0.0.1
  */
 import axios, { AxiosError, AxiosRequestConfig } from 'axios'
-import * as E from 'fp-ts/Either'
-import * as A from 'fp-ts/Array'
 import { pipe } from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
-import * as qs from 'qs'
-import { MlConfig } from './config'
+import { ExternalError, MlConfig, MlError, UnprocessableError } from './config'
 
 /** @since 0.0.1 */
 export const fpAxios =
@@ -21,7 +18,10 @@ export const fpAxios =
     )
   }
 
-const makeAxiosRequest = (cfg: MlConfig, data: Partial<AxiosRequestConfig>): AxiosRequestConfig => {
+export const makeAxiosRequest = (
+  cfg: MlConfig,
+  data: Partial<AxiosRequestConfig>
+): AxiosRequestConfig => {
   return {
     headers: {
       authorization: `Bearer ${cfg.token}`,
@@ -47,23 +47,53 @@ export interface IMeta {
 /** @since 0.0.1 */
 export type xhrMeth = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-interface IRequestOpts {
+export interface IRequestOpts {
   method: xhrMeth
   params?: { [key: string]: any }
   data?: { [key: string]: any }
 }
 
-/** @since 0.0.1 */
+/** @since 0.0.7 */
 export const cleanedUpAxiosError = <T>(err: AxiosError<T>) => {
-  err.request = null
-  err.config = undefined
-  if (err.response) {
-    err.response.request = null
+  let nErr: MlError
+
+  const cleanAx = (err: AxiosError<T>) => {
+    const res = {
+      ...err,
+      request: null,
+      config: null,
+      Headers: null,
+      response: { ...err.response, headers: null, /*config: null,*/ request: null },
+    }
+    return res
   }
-  return err
+
+  switch (err.response?.status) {
+    case 400:
+    case 404:
+    case 422:
+      nErr = {
+        kind: 'UnprocessableError',
+        code: err.response.status,
+        message: err.response.statusText,
+        data: err.response?.data,
+        initialError: cleanAx(err),
+      } as UnprocessableError
+      break
+
+    default:
+      nErr = {
+        kind: 'ExternalError',
+        code: err.code ?? 0,
+        message: err.message,
+        initialError: cleanAx(err),
+      } as ExternalError
+      break
+  }
+  return nErr
 }
 
-/** @since 0.0.1 */
+/** @since 0.0.7 */
 export const mlRequest =
   <TRes>(config: MlConfig) =>
   (opts: IRequestOpts, apiUrl: string) => {
@@ -75,81 +105,18 @@ export const mlRequest =
     return res
   }
 
-/** @since 0.0.1 */
-export interface IBatchRequest {
-  method: xhrMeth
-  path: string
-  body?: any
-}
-
-/** @since 0.0.1 */
-export interface IBatchResponse {
-  total: number
-  successful: number
-  failed: number
-  responses: Array<{ code: number; body: any }>
-}
-
-/** @since 0.0.1 */
-export const mlBatch = (opts: IRequestOpts, apiUrl: string): E.Either<Error, IBatchRequest> => {
-  const res = pipe(
-    E.tryCatch(() => qs.stringify(opts.params, { encode: false }), E.toError),
-    E.chain((p) =>
-      E.of({ method: opts.method, path: apiUrl + (p ? '?' + p : ''), body: opts.data })
-    )
-  )
-  return res
-}
-
-/** @since 0.0.1 */
-export const runBatch = (config: MlConfig) => (reqs: Array<IBatchRequest>) => {
-  const res = pipe(
-    fpAxios<IBatchResponse>(makeAxiosRequest(config, { method: 'post', data: { requests: reqs } }))(
-      'api/batch'
-    ),
-    TE.mapLeft((e) => cleanedUpAxiosError(e)),
-    TE.map((resp) => resp.data)
-  )
-  return res
-}
-
-/** @since 0.0.6 */
-export const validateBatch = (b: IBatchResponse) => {
-  if (b.failed > 0) {
-    // const failed = pipe(b.responses, A.filter(e => e.code >= 300))
-    const err = new Error(`${b.failed} batch failed out of ${b.total}`)
-    return TE.left(err)
-  } else {
-    return TE.right(b)
+/** @since 0.0.7 */
+export const makeExternalError = (
+  err: Error,
+  message: string,
+  data: any = undefined,
+  code = 0
+): ExternalError => {
+  return {
+    kind: 'ExternalError',
+    code,
+    message,
+    data,
+    initialError: err,
   }
 }
-
-/** @since 0.0.6 */
-export const batchList =
-  <T>(config: MlConfig) =>
-  (list: T[], fn: (field: T) => E.Either<Error, IBatchRequest>) => {
-    return pipe(
-      list,
-      A.traverse(E.Applicative)(fn),
-      TE.fromEither,
-      TE.chainW(runBatch(config)),
-      TE.chain(validateBatch)
-    )
-  }
-
-/** @since 0.0.6 */
-export const batchListInChunks =
-  <T>(config: MlConfig) =>
-  (chunkLength: number, list: T[], fn: (field: T) => E.Either<Error, IBatchRequest>) => {
-    const runAndValidateBatch = (reqs: IBatchRequest[]) =>
-      pipe(reqs, runBatch(config), TE.chain(validateBatch))
-    return pipe(
-      list,
-      A.traverse(E.Applicative)(fn),
-      E.map(A.chunksOf(chunkLength)),
-      TE.fromEither,
-      TE.map(A.map(runAndValidateBatch)),
-      TE.map(A.sequence(TE.ApplicativeSeq)),
-      TE.flatten
-    )
-  }
